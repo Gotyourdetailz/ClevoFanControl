@@ -6,11 +6,13 @@ using System.Management;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using MaterialSkin;
+using MaterialSkin.Controls;
 //using OpenHardwareMonitor.Hardware;
 
 
 namespace ClevoFanControl {
-    public partial class frmMain : Form {
+    public partial class frmMain : MaterialForm {
 
         private const int EC_POLL_INTERVAL = 3000; // interval to poll EC
         
@@ -78,6 +80,11 @@ namespace ClevoFanControl {
 
             fan = new ClevoEcInfo();
 
+            var materialSkinManager = MaterialSkinManager.Instance;
+            materialSkinManager.EnforceBackcolorOnAllComponents = true;
+            materialSkinManager.Theme = MaterialSkinManager.Themes.LIGHT;
+            materialSkinManager.ColorScheme = new ColorScheme(Primary.Blue600, Primary.Blue700, Primary.Blue200, Accent.LightBlue200, TextShade.WHITE);
+
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(UnhandledExceptionHandler);
 
             //computer = new Computer() {
@@ -85,50 +92,10 @@ namespace ClevoFanControl {
             //    GPUEnabled = true
             //};
 
-            maxFanTable.Fan40 = 100;
-            maxFanTable.Fan45 = 100;
-            maxFanTable.Fan50 = 100;
-            maxFanTable.Fan55 = 100;
-            maxFanTable.Fan60 = 100;
-            maxFanTable.Fan65 = 100;
-            maxFanTable.Fan70 = 100;
-            maxFanTable.Fan75 = 100;
-            maxFanTable.Fan80 = 100;
-            maxFanTable.Fan85 = 100;
-
-            halfFanTable.Fan40 = 50;
-            halfFanTable.Fan45 = 50;
-            halfFanTable.Fan50 = 50;
-            halfFanTable.Fan55 = 50;
-            halfFanTable.Fan60 = 50;
-            halfFanTable.Fan65 = 50;
-            halfFanTable.Fan70 = 50;
-            halfFanTable.Fan75 = 50;
-            halfFanTable.Fan80 = 50;
-            halfFanTable.Fan85 = 50;
-
-            defaultCpuFanTable.Fan40 = 40;
-            defaultCpuFanTable.Fan45 = 40;
-            defaultCpuFanTable.Fan50 = 40;
-            defaultCpuFanTable.Fan55 = 40;
-            defaultCpuFanTable.Fan60 = 50;
-            defaultCpuFanTable.Fan65 = 50;
-            defaultCpuFanTable.Fan70 = 60;
-            defaultCpuFanTable.Fan75 = 60;
-            defaultCpuFanTable.Fan80 = 70;
-            defaultCpuFanTable.Fan85 = 70;
-
-            defaultGpuFanTable.Fan40 = 40;
-            defaultGpuFanTable.Fan45 = 40;
-            defaultGpuFanTable.Fan50 = 40;
-            defaultGpuFanTable.Fan55 = 40;
-            defaultGpuFanTable.Fan60 = 50;
-            defaultGpuFanTable.Fan65 = 50;
-            defaultGpuFanTable.Fan70 = 60;
-            defaultGpuFanTable.Fan75 = 60;
-            defaultGpuFanTable.Fan80 = 70;
-            defaultGpuFanTable.Fan85 = 70;
-
+            maxFanTable = FanTable.CreateConstant(100);
+            halfFanTable = FanTable.CreateConstant(50);
+            defaultCpuFanTable = FanTable.FromArray(new[] {40,40,40,40,50,50,60,60,70,70});
+            defaultGpuFanTable = FanTable.FromArray(new[] {40,40,40,40,50,50,60,60,70,70});
             cpuFanTable = defaultCpuFanTable;
             gpuFanTable = defaultGpuFanTable;
 
@@ -1054,6 +1021,37 @@ namespace ClevoFanControl {
         public int Fan75;
         public int Fan80;
         public int Fan85;
+
+        public static FanTable CreateConstant(int value) {
+            return new FanTable {
+                Fan40 = value,
+                Fan45 = value,
+                Fan50 = value,
+                Fan55 = value,
+                Fan60 = value,
+                Fan65 = value,
+                Fan70 = value,
+                Fan75 = value,
+                Fan80 = value,
+                Fan85 = value
+            };
+        }
+
+        public static FanTable FromArray(int[] values) {
+            if (values.Length != 10) throw new ArgumentException("Expected 10 values.");
+            return new FanTable {
+                Fan40 = values[0],
+                Fan45 = values[1],
+                Fan50 = values[2],
+                Fan55 = values[3],
+                Fan60 = values[4],
+                Fan65 = values[5],
+                Fan70 = values[6],
+                Fan75 = values[7],
+                Fan80 = values[8],
+                Fan85 = values[9]
+            };
+        }
     }
 
     public class PlotChangedEventArgs : EventArgs {
